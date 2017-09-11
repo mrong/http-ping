@@ -1,0 +1,15 @@
+#!/bin/bash
+
+url_regex="(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]"
+
+if [[ $1 =~ $url_regex ]]; then
+    while [ true ]; do
+        curl -w "%{http_code} %{time_total}\n" -o /dev/null -s $1
+        if [ "$?" != "0" ]; then
+            break
+        fi 
+        sleep 1
+    done
+else
+    echo "Not a valid link"
+fi
