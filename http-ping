@@ -49,12 +49,12 @@ shift $((${OPTIND} - 1))
 url="$1"
 
 if [ -z "${url}" ] || [ ${show_usage} ]; then
-    echo "Usage: $0 [options] <url>"
+    echo "Usage: $0 [-h] [-i iterations] [-s sleep] [-t timeout] <url>"
     echo ""
     echo "Options:"
-    echo "  -i  Check the URL the given times"
-    echo "  -s  Sleep the given time (see 'man sleep')"
-    echo "  -t  Timeout for a single request"
+    echo "  -i  Check the URL the given times (default: no limit)"
+    echo "  -s  Sleep the given time (default: 1, see 'man sleep')"
+    echo "  -t  Timeout for a single request (default: none)"
     echo "  -h  Show this help message"
     exit
 fi
