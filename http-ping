@@ -3,8 +3,29 @@
 script_path=$(dirname $(realpath $0))
 source "${script_path}/http-code-to-text.sh"
 
+function show_stats()
+{
+    local total_requests=$((successful_requests + failed_requests))
+    local average_time=$(awk "BEGIN {print ${total_time} / ${total_requests}}")
+    local successful_requests_percentage=$(awk "BEGIN {print ${successful_requests} / ${total_requests} * 100}")
+    local failed_requests_percentage=$(awk "BEGIN {print ${failed_requests} / ${total_requests} * 100}")
+
+    echo ""
+    echo "--- Statistics ---"
+    echo "${total_requests} requests - ${successful_requests} successful (${successful_requests_percentage}%), ${failed_requests} failed (${failed_requests_percentage}%)"
+    echo "Average time: ${average_time}"
+    exit
+}
+
+trap show_stats SIGINT
+
 loop_iterations=0
 sleep_time=1
+
+iteration=0
+total_time=0
+successful_requests=0
+failed_requests=0
 
 while getopts "hi:s:" arg; do
     case ${arg} in
@@ -57,12 +78,22 @@ if [[ $1 =~ ${url_regex} ]]; then
 
         echo -e "${iteration}\t${code}\t${time}\t${description}"
 
+        total_time=$(awk "BEGIN {print ${total_time} + ${time}}")
+
+        if [ $code -gt 99 ] && [ $code -lt 400 ]; then
+            successful_requests=$((successful_requests + 1))
+        else
+            failed_requests=$((failed_requests + 1))
+        fi
+
         if [ $loop_iterations -gt 0 ] && [ $iteration -eq $loop_iterations ]; then
             break
         fi
 
         sleep ${sleep_time}
     done
+
+    show_stats
 else
     echo "URL '${url}' is not a valid link"
 fi
