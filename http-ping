@@ -1,193 +1,68 @@
 #!/bin/bash
 
+script_path=$(dirname $0)
+source "${script_path}/http-code-to-text.sh"
+
+loop_iterations=0
+sleep_time=1
+
+while getopts "hi:s:" arg; do
+    case ${arg} in
+        h)
+            show_usage=true
+        ;;
+        i)
+            loop_iterations=${OPTARG}
+        ;;
+        s)
+            sleep_time=${OPTARG}
+        ;;
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
+url="$1"
+
+if [ -z "${url}" ] || [ ${show_usage} ]; then
+    echo "Usage: $0 [options] <url>"
+    echo ""
+    echo "Options:"
+    echo "  -i  Check the URL the given times"
+    echo "  -s  Sleep the given time (see 'man sleep')"
+    echo "  -h  Show this help message"
+    exit
+fi
+
 url_regex="(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]"
 
-if [[ $1 =~ $url_regex ]]; then
+if [[ $1 =~ ${url_regex} ]]; then
     url=$1
-    echo -e "\nStatus\tTime\t\tDescription"
+    echo -e "\n#\tStatus\tTime\t\tDescription"
     echo "-------------------------------------------------------------------------------"
-    
+
     while [ true ]; do
-        status=$(curl -w "%{http_code} %{time_total}\n" -o /dev/null -s $url) 
+        iteration=$((iteration + 1))
+        status=$(curl -w "%{http_code} %{time_total}\n" -o /dev/null -s ${url})
 
         if [ "$?" != "0" ]; then
             break
-        fi 
-
-        set - $status
-
-        if [ "$1" -eq "100" ]; then 
-            echo -e "$1\t$2\tContinue"
-        elif [ "$1" -eq "101" ]; then 
-            echo -e "$1\t$2\tSwitching Protocols"
-        elif [ "$1" -eq "102" ]; then 
-            echo -e "$1\t$2\tProcessing (WebDAV)"
-        elif [ "$1" -eq "103" ]; then 
-            echo -e "$1\t$2\tCheckpoint | Early Hints"
-        elif [ "$1" -eq "200" ]; then 
-            echo -e "$1\t$2\tOk"
-        elif [ "$1" -eq "201" ]; then 
-            echo -e "$1\t$2\tCreated"
-        elif [ "$1" -eq "202" ]; then 
-            echo -e "$1\t$2\tAccepted"
-        elif [ "$1" -eq "203" ]; then 
-            echo -e "$1\t$2\tNon-Authoritative Information"
-        elif [ "$1" -eq "204" ]; then 
-            echo -e "$1\t$2\tNo Content"
-        elif [ "$1" -eq "205" ]; then 
-            echo -e "$1\t$2\tReset Content"
-        elif [ "$1" -eq "206" ]; then 
-            echo -e "$1\t$2\tPartial Content"
-        elif [ "$1" -eq "207" ]; then 
-            echo -e "$1\t$2\tMulti-Status (WebDAV)"
-        elif [ "$1" -eq "208" ]; then 
-            echo -e "$1\t$2\tAlready Reported (WebDAV)"
-        elif [ "$1" -eq "226" ]; then 
-            echo -e "$1\t$2\tIM Used"
-        elif [ "$1" -eq "300" ]; then 
-            echo -e "$1\t$2\tMultiple Choices"
-        elif [ "$1" -eq "301" ]; then 
-            echo -e "$1\t$2\tMoved Permanently"
-        elif [ "$1" -eq "302" ]; then 
-            echo -e "$1\t$2\tFound"
-        elif [ "$1" -eq "303" ]; then 
-            echo -e "$1\t$2\tSee Other"
-        elif [ "$1" -eq "304" ]; then 
-            echo -e "$1\t$2\tNot Modified"
-        elif [ "$1" -eq "305" ]; then 
-            echo -e "$1\t$2\tUse Proxy"
-        elif [ "$1" -eq "306" ]; then 
-            echo -e "$1\t$2\tSwitch Proxy"
-        elif [ "$1" -eq "307" ]; then 
-            echo -e "$1\t$2\tTemporary Redirect"
-        elif [ "$1" -eq "308" ]; then 
-            echo -e "$1\t$2\tPermanent Redirect"
-        elif [ "$1" -eq "400" ]; then 
-            echo -e "$1\t$2\tBad Request"
-        elif [ "$1" -eq "401" ]; then 
-            echo -e "$1\t$2\tUnauthorized"
-        elif [ "$1" -eq "402" ]; then 
-            echo -e "$1\t$2\tPayment Required"
-        elif [ "$1" -eq "403" ]; then 
-            echo -e "$1\t$2\tForbidden"
-        elif [ "$1" -eq "404" ]; then 
-            echo -e "$1\t$2\tNot Found"
-        elif [ "$1" -eq "405" ]; then 
-            echo -e "$1\t$2\tMethod Not Allowed"
-        elif [ "$1" -eq "406" ]; then 
-            echo -e "$1\t$2\tNot Acceptable"
-        elif [ "$1" -eq "407" ]; then 
-            echo -e "$1\t$2\tProxy Authentication Required"
-        elif [ "$1" -eq "408" ]; then 
-            echo -e "$1\t$2\tRequest Timeout"
-        elif [ "$1" -eq "409" ]; then 
-            echo -e "$1\t$2\tConflict"
-        elif [ "$1" -eq "410" ]; then 
-            echo -e "$1\t$2\tGone"
-        elif [ "$1" -eq "411" ]; then 
-            echo -e "$1\t$2\tLength Required"
-        elif [ "$1" -eq "412" ]; then 
-            echo -e "$1\t$2\tPrecondition Failed"
-        elif [ "$1" -eq "413" ]; then 
-            echo -e "$1\t$2\tPayload Too Large"
-        elif [ "$1" -eq "414" ]; then 
-            echo -e "$1\t$2\tURI Too Long"
-        elif [ "$1" -eq "415" ]; then 
-            echo -e "$1\t$2\tUnsupported Media Type"
-        elif [ "$1" -eq "416" ]; then 
-            echo -e "$1\t$2\tRange Not Satisfiable"
-        elif [ "$1" -eq "417" ]; then 
-            echo -e "$1\t$2\tExpectation Failed"
-        elif [ "$1" -eq "418" ]; then 
-            echo -e "$1\t$2\tI'm a teapot"
-        elif [ "$1" -eq "420" ]; then 
-            echo -e "$1\t$2\tMethod Failure (Spring Framework) | Enhance Your Calm (Twitter)"
-        elif [ "$1" -eq "421" ]; then 
-            echo -e "$1\t$2\tMisdirected Request"
-        elif [ "$1" -eq "422" ]; then 
-            echo -e "$1\t$2\tUnprocessable Entity (WebDAV)"
-        elif [ "$1" -eq "423" ]; then 
-            echo -e "$1\t$2\tLocked (WebDAV)"
-        elif [ "$1" -eq "424" ]; then 
-            echo -e "$1\t$2\tFailed Dependency (WebDAV)"
-        elif [ "$1" -eq "426" ]; then 
-            echo -e "$1\t$2\tUpgrade Required"
-        elif [ "$1" -eq "428" ]; then 
-            echo -e "$1\t$2\tPrecondition Required"
-        elif [ "$1" -eq "429" ]; then 
-            echo -e "$1\t$2\tToo Many Requests"
-        elif [ "$1" -eq "431" ]; then 
-            echo -e "$1\t$2\tRequest Header Fields Too Large"
-        elif [ "$1" -eq "440" ]; then 
-            echo -e "$1\t$2\tLogin Time-out (IIS)"
-        elif [ "$1" -eq "444" ]; then 
-            echo -e "$1\t$2\tNo Response (nginx)"
-        elif [ "$1" -eq "449" ]; then 
-            echo -e "$1\t$2\tRetry With (IIS)"
-        elif [ "$1" -eq "450" ]; then 
-            echo -e "$1\t$2\tBlocked by Windows Parental Controls (Microsoft)"
-        elif [ "$1" -eq "451" ]; then 
-            echo -e "$1\t$2\tUnavailable For Legal Reasons | Redirect (IIS)"
-        elif [ "$1" -eq "495" ]; then 
-            echo -e "$1\t$2\tSSL Certificate Error (nginx)"
-        elif [ "$1" -eq "496" ]; then 
-            echo -e "$1\t$2\tSSL Certificate Required (nginx)"
-        elif [ "$1" -eq "497" ]; then 
-            echo -e "$1\t$2\tHTTP Request Sent to HTTPS Port (nginx)"
-        elif [ "$1" -eq "498" ]; then 
-            echo -e "$1\t$2\tInvalid Token (Esri)"
-        elif [ "$1" -eq "499" ]; then 
-            echo -e "$1\t$2\tToken Required (Esri) | Client Closed Request (nginx)"
-        elif [ "$1" -eq "500" ]; then 
-            echo -e "$1\t$2\tInternal Server Error"
-        elif [ "$1" -eq "501" ]; then 
-            echo -e "$1\t$2\tNot Implemented"
-        elif [ "$1" -eq "502" ]; then 
-            echo -e "$1\t$2\tBad Gateway"
-        elif [ "$1" -eq "503" ]; then 
-            echo -e "$1\t$2\tService Unavailable"
-        elif [ "$1" -eq "504" ]; then 
-            echo -e "$1\t$2\tGateway Timeout"
-        elif [ "$1" -eq "505" ]; then 
-            echo -e "$1\t$2\tHTTP Version Not Supported"
-        elif [ "$1" -eq "506" ]; then 
-            echo -e "$1\t$2\tVariant Also Negotiates"
-        elif [ "$1" -eq "507" ]; then 
-            echo -e "$1\t$2\tInsufficient Storage (WebDAV)"
-        elif [ "$1" -eq "508" ]; then 
-            echo -e "$1\t$2\tLoop Detected (WebDAV)"
-        elif [ "$1" -eq "509" ]; then 
-            echo -e "$1\t$2\tBandwidth Limit Exceeded (Apache Web Server / cPanel)"
-        elif [ "$1" -eq "510" ]; then 
-            echo -e "$1\t$2\tNot Extended"
-        elif [ "$1" -eq "511" ]; then 
-            echo -e "$1\t$2\tNetwork Authentication Required"
-        elif [ "$1" -eq "520" ]; then 
-            echo -e "$1\t$2\tUnknown Error (Cloudflare)"
-        elif [ "$1" -eq "521" ]; then 
-            echo -e "$1\t$2\tWeb Server Is Down (Cloudflare)"
-        elif [ "$1" -eq "522" ]; then 
-            echo -e "$1\t$2\tConnection Timed Out (Cloudflare)"
-        elif [ "$1" -eq "523" ]; then 
-            echo -e "$1\t$2\tOrigin Is Unreachable (Cloudflare)"
-        elif [ "$1" -eq "524" ]; then 
-            echo -e "$1\t$2\tA Timeout Occured (Cloudflare)"
-        elif [ "$1" -eq "525" ]; then 
-            echo -e "$1\t$2\tSSL Handshake Failed (Cloudflare)"
-        elif [ "$1" -eq "526" ]; then 
-            echo -e "$1\t$2\tInvalid SSL Certificate (Cloudflare)"
-        elif [ "$1" -eq "527" ]; then 
-            echo -e "$1\t$2\tRailgun Error (Cloudflare)"
-        elif [ "$1" -eq "530" ]; then 
-            echo -e "$1\t$2\tSite is frozen"
-        elif [ "$1" -eq "598" ]; then 
-            echo -e "$1\t$2\tNetwork read timeout error"
-        else 
-            echo -e "$1\t$2\tUnknown HTTP-Status-Code !!!"
         fi
 
-        sleep 1
+        set - ${status}
+
+        code=$1
+        time=$2
+        description=$(http_code_to_text ${code})
+
+        echo -e "${iteration}\t${code}\t${time}\t${description}"
+
+        if [ $loop_iterations -gt 0 ] && [ $iteration -eq $loop_iterations ]; then
+            break
+        fi
+
+        sleep ${sleep_time}
     done
 else
-    echo "Not a valid link"
+    echo "URL '${url}' is not a valid link"
 fi
