@@ -1,6 +1,6 @@
 #!/bin/bash
 
-script_path=$(dirname $0)
+script_path=$(dirname $(realpath $0))
 source "${script_path}/http-code-to-text.sh"
 
 loop_iterations=0
