@@ -27,7 +27,7 @@ total_time=0
 successful_requests=0
 failed_requests=0
 
-while getopts "hi:s:" arg; do
+while getopts "hi:s:t:" arg; do
     case ${arg} in
         h)
             show_usage=true
@@ -37,6 +37,9 @@ while getopts "hi:s:" arg; do
         ;;
         s)
             sleep_time=${OPTARG}
+        ;;
+        t)
+            timeout=${OPTARG}
         ;;
     esac
 done
@@ -51,6 +54,7 @@ if [ -z "${url}" ] || [ ${show_usage} ]; then
     echo "Options:"
     echo "  -i  Check the URL the given times"
     echo "  -s  Sleep the given time (see 'man sleep')"
+    echo "  -t  Timeout for a single request"
     echo "  -h  Show this help message"
     exit
 fi
@@ -59,16 +63,22 @@ url_regex="(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=
 
 if [[ $1 =~ ${url_regex} ]]; then
     url=$1
+
+    curl_options=("-w \"%{http_code} %{time_total}\n\" -o /dev/null -s")
+
+    if [ ${timeout} ]; then
+        curl_options+=("--max-time ${timeout}")
+    fi
+
+    curl_command="curl ${curl_options[*]} ${url}"
+
     echo -e "\n#\tStatus\tTime\t\tDescription"
     echo "-------------------------------------------------------------------------------"
 
     while [ true ]; do
         iteration=$((iteration + 1))
-        status=$(curl -w "%{http_code} %{time_total}\n" -o /dev/null -s ${url})
 
-        if [ "$?" != "0" ]; then
-            break
-        fi
+        status=$(eval ${curl_command})
 
         set - ${status}
 

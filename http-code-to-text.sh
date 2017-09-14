@@ -1,6 +1,9 @@
 function http_code_to_text()
 {
     case "$1" in
+        000)
+            echo "Unknown Response"
+        ;;
         100)
             echo "Continue"
         ;;
