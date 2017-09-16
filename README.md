@@ -16,7 +16,7 @@ This is the result of a fun nightly live coding session at our LsW Telegram chan
 ### Installation
 * download the repository to your local folder
 * ```cd``` into the http-ping folder
-* ```chmod +x http-ping``` to make the file executable
+* have fun :)
 
 To make the usage more comfortable, you can create an alias in your ```.bashrc```:
 ```
@@ -25,7 +25,8 @@ alias http-ping="/yourLocalPath/http-ping/http-ping"
 
 ### How to use
 Just type ```http-ping https://www.example.com```
-Press ```ctrl+c``` to stop the process. At the end you'll see some statistics as it also provides the ping program.
+    Press ```ctrl+c``` to stop the process. 
+    At the end you'll see some statistics as it also provides the ping program.
 
 ### Options
 Parameter | Meaning | Default
@@ -44,4 +45,4 @@ Many thanks to [fragbenny](https://fragbenny.de/) for the logo :)
 
 ### License
 Copyright © 2017 [Michael Wieland](https://github.com/Programie) and [Michael Rong](https://github.com/mrong)
-[GNU General Public License v3.0](LICENCE)
+    [GNU General Public License v3.0](LICENCE)
