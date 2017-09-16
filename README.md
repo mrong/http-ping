@@ -24,9 +24,9 @@ alias http-ping="/yourLocalPath/http-ping/http-ping"
 ```
 
 ### How to use
-Just type ```http-ping https://www.example.com```
-    Press ```ctrl+c``` to stop the process. 
-    At the end you'll see some statistics as it also provides the ping program.
+Just type ```http-ping https://www.example.com```      
+Press ```ctrl+c``` to stop the process.       
+At the end you'll see some statistics as it also provides the ping program.      
 
 ### Options
 Parameter | Meaning | Default
@@ -44,5 +44,5 @@ Parameter | Meaning | Default
 Many thanks to [fragbenny](https://fragbenny.de/) for the logo :) 
 
 ### License
-Copyright © 2017 [Michael Wieland](https://github.com/Programie) and [Michael Rong](https://github.com/mrong)
-    [GNU General Public License v3.0](LICENCE)
+Copyright © 2017 [Michael Wieland](https://github.com/Programie) and [Michael Rong](https://github.com/mrong)      
+[GNU General Public License v3.0](LICENCE)      
