@@ -1,5 +1,40 @@
 #!/bin/bash
 
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# *                                                                         * *
+# * Authors:            Michael Wieland                                     * *
+# *                     github@selfcoders.com                               * *
+# *                     https://selfcoders.com                              * *
+# *                                                                         * *
+# *                     Michael Rong                                        * *
+# *                     miro@electronic.works                               * *
+# *                                                                         * *
+# * Creation Date:      09/10/2017                                          * *
+# *                                                                         * *
+# * Version:            0.1.0                                               * *
+# *                                                                         * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# *                                                                         * *
+# *  Copyright (C) 2017 Michael Wieland and Michael Rong                    * *
+# *                                                                         * *
+# *  'http-ping' is free software:                                          * *
+# *  you can redistribute it and/or modify                                  * *
+# *  it under the terms of the GNU General Public License as published by   * *
+# *  the Free Software Foundation, version 3 of the License.                * *
+# *                                                                         * *
+# *  'http-ping' is distributed in the hope that it will be                 * *
+# *  useful, but WITHOUT ANY WARRANTY; without even the implied warranty    * *
+# *  of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the       * *
+# *  GNU General Public License for more details.                           * *
+# *                                                                         * *
+# *  You should have received a copy of the GNU General Public License      * *
+# *  along with 'http-ping'. If not, see                                    * *
+# *  <http://www.gnu.org/licenses/>.                                        * *
+# *                                                                         * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 script_path=$(dirname $(realpath $0))
 source "${script_path}/http-code-to-text.sh"
 
