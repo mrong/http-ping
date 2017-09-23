@@ -36,7 +36,7 @@ Parameter | Meaning | Default
 -t | timeout for a single request | none
 -h | show the help message
 
-### Screenshot / Examples
+### Screenshots / Examples
 ![screenshot1](assets/images/screenshot_ping.png)
 ![screenshot1](assets/images/screenshot_help.png)
 
