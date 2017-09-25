@@ -157,14 +157,14 @@ if [ -z "${url}" ] || [ ${show_usage} ]; then
     echo "  -s  Sleep the given time (default: 1, see 'man sleep')"
     echo "  -t  Timeout for a single request (default: none)"
     echo "  -h  Show this help message"
+    echo ""
+    echo "Note: Passing additional curl options might break the output (especially '-w, --write-out <format>')"
     exit
 fi
 
 url_regex="(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]"
 
-if [[ $1 =~ ${url_regex} ]]; then
-    url=$1
-
+if [[ ${url} =~ ${url_regex} ]]; then
     parse_url ${url}
     ips=$(dns_lookup ${parse_url_host})
 
@@ -190,7 +190,7 @@ if [[ $1 =~ ${url_regex} ]]; then
             do_request
         fi
 
-        if [ $loop_iterations -gt 0 ] && [ $iteration -eq $loop_iterations ]; then
+        if [ ${loop_iterations} -gt 0 ] && [ ${iteration} -eq ${loop_iterations} ]; then
             break
         fi
 
