@@ -37,7 +37,6 @@
 
 script_path=$(dirname $(realpath $0))
 source "${script_path}/http-code-to-text.sh"
-source "${script_path}/parse-url.sh"
 
 function show_stats()
 {
@@ -53,67 +52,6 @@ function show_stats()
     exit
 }
 
-function dns_lookup()
-{
-    dig +short A $1
-    dig +short AAAA $1
-}
-
-function do_request()
-{
-    local connect_to_ip=$1
-
-    iteration=$((iteration + 1))
-
-    curl_options=("-w \"%{http_code} %{time_total} %{remote_ip}\n\" -o /dev/null -s")
-
-    if [ ${timeout} ]; then
-        curl_options+=("--max-time ${timeout}")
-    fi
-
-    if [ ${connect_to_ip} ]; then
-        if [ -z ${parse_url_port} ]; then
-            case ${parse_url_protocol} in
-                http)
-                    parse_url_port=80
-                ;;
-                https)
-                    parse_url_port=443
-                ;;
-            esac
-        fi
-
-        curl_options+=("--resolve ${parse_url_host}:${parse_url_port}:${connect_to_ip}")
-    fi
-
-    curl_command="curl ${curl_options[*]} ${url}"
-
-    status=$(eval ${curl_command})
-
-    set - ${status}
-
-    code=$1
-    time=$2
-    ip=$3
-    description=$(http_code_to_text ${code})
-
-    if [ ${ip} ]; then
-        ip_string=$(printf "%-${max_ip_length}s" ${ip})
-
-        echo -e "${iteration}\t${ip_string}\t${code}\t${time}\t${description}"
-    else
-        echo -e "${iteration}\t${code}\t${time}\t${description}"
-    fi
-
-    total_time=$(awk "BEGIN {print ${total_time} + ${time}}")
-
-    if [ ${code} -gt 99 ] && [ ${code} -lt 400 ]; then
-        successful_requests=$((successful_requests + 1))
-    else
-        failed_requests=$((failed_requests + 1))
-    fi
-}
-
 trap show_stats SIGINT
 
 loop_iterations=0
@@ -124,11 +62,8 @@ total_time=0
 successful_requests=0
 failed_requests=0
 
-while getopts "ahi:s:t:" arg; do
+while getopts "hi:s:t:" arg; do
     case ${arg} in
-        a)
-            request_from_all_ips=true
-        ;;
         h)
             show_usage=true
         ;;
@@ -152,7 +87,6 @@ if [ -z "${url}" ] || [ ${show_usage} ]; then
     echo "Usage: $0 [-h] [-i iterations] [-s sleep] [-t timeout] <url>"
     echo ""
     echo "Options:"
-    echo "  -a  Request the given URL from all IP addresses behind the domain"
     echo "  -i  Check the URL the given times (default: no limit)"
     echo "  -s  Sleep the given time (default: 1, see 'man sleep')"
     echo "  -t  Timeout for a single request (default: none)"
@@ -165,29 +99,36 @@ url_regex="(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=
 if [[ $1 =~ ${url_regex} ]]; then
     url=$1
 
-    parse_url ${url}
-    ips=$(dns_lookup ${parse_url_host})
+    curl_options=("-w \"%{http_code} %{time_total}\n\" -o /dev/null -s")
 
-    max_ip_length=0
+    if [ ${timeout} ]; then
+        curl_options+=("--max-time ${timeout}")
+    fi
 
-    for ip in ${ips}; do
-        ip_length=${#ip}
+    curl_command="curl ${curl_options[*]} ${url}"
 
-        if [ ${ip_length} -gt ${max_ip_length} ]; then
-            max_ip_length=${ip_length}
-        fi
-    done
-
-    echo -e "\n#\t$(printf "%-${max_ip_length}s" "IP")\tStatus\tTime\t\tDescription"
+    echo -e "\n#\tStatus\tTime\t\tDescription"
     echo "-------------------------------------------------------------------------------"
 
     while [ true ]; do
-        if [ ${request_from_all_ips} ]; then
-            for ip in ${ips}; do
-                do_request ${ip}
-            done
+        iteration=$((iteration + 1))
+
+        status=$(eval ${curl_command})
+
+        set - ${status}
+
+        code=$1
+        time=$2
+        description=$(http_code_to_text ${code})
+
+        echo -e "${iteration}\t${code}\t${time}\t${description}"
+
+        total_time=$(awk "BEGIN {print ${total_time} + ${time}}")
+
+        if [ $code -gt 99 ] && [ $code -lt 400 ]; then
+            successful_requests=$((successful_requests + 1))
         else
-            do_request
+            failed_requests=$((failed_requests + 1))
         fi
 
         if [ $loop_iterations -gt 0 ] && [ $iteration -eq $loop_iterations ]; then
