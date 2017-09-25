@@ -86,6 +86,10 @@ function do_request()
         curl_options+=("--resolve ${parse_url_host}:${parse_url_port}:${connect_to_ip}")
     fi
 
+    if [ "${additional_curl_options}" ]; then
+        curl_options+=(${additional_curl_options})
+    fi
+
     curl_command="curl ${curl_options[*]} ${url}"
 
     status=$(eval ${curl_command})
@@ -148,8 +152,12 @@ shift $((${OPTIND} - 1))
 
 url="$1"
 
+shift
+
+additional_curl_options="$@"
+
 if [ -z "${url}" ] || [ ${show_usage} ]; then
-    echo "Usage: $0 [-h] [-i iterations] [-s sleep] [-t timeout] <url>"
+    echo "Usage: $0 [-h] [-i iterations] [-s sleep] [-t timeout] <url> [<additional curl options>]"
     echo ""
     echo "Options:"
     echo "  -a  Request the given URL from all IP addresses behind the domain"
