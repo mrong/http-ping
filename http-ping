@@ -97,13 +97,13 @@ function do_request()
     ip=$3
     description=$(http_code_to_text ${code})
 
-    if [ -z ${ip} ]; then
-        ip=${connect_to_ip}
+    if [ ${ip} ]; then
+        ip_string=$(printf "%-${max_ip_length}s" ${ip})
+
+        echo -e "${iteration}\t${ip_string}\t${code}\t${time}\t${description}"
+    else
+        echo -e "${iteration}\t${code}\t${time}\t${description}"
     fi
-
-    ip_string=$(printf "%-${max_ip_length}s" ${ip})
-
-    echo -e "${iteration}\t${ip_string}\t${code}\t${time}\t${description}"
 
     total_time=$(awk "BEGIN {print ${total_time} + ${time}}")
 
