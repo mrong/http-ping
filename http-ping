@@ -55,7 +55,7 @@ class Ping:
 
         print("")
         print("-- Statistics ---")
-        print("{} request - {} successful ({}%), {} failed ({}%)".format(total_requests, self.successful_requests, successful_requests_percentage, self.failed_requests, failed_requests_percentage))
+        print("{} requests - {} successful ({}%), {} failed ({}%)".format(total_requests, self.successful_requests, successful_requests_percentage, self.failed_requests, failed_requests_percentage))
         print("Average time: {}".format(round(average_time, 2)))
 
     def print_table_row(self, values):
