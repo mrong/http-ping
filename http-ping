@@ -8,6 +8,8 @@ import time
 from http.client import responses
 from urllib.parse import urlparse
 
+import argcomplete
+
 
 class Ping:
     def __init__(self, url, timeout, additional_curl_options, max_ip_length):
@@ -183,6 +185,8 @@ def main():
 
     argument_parser.add_argument("url", help="The URL to request")
     argument_parser.add_argument("curl_options", nargs=argparse.REMAINDER, help="Additional options to pass to curl")
+
+    argcomplete.autocomplete(argument_parser)
 
     arguments = argument_parser.parse_args()
 
