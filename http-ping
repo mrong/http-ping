@@ -30,11 +30,11 @@ class Ping:
                 max_description_length = length
 
         self.table_columns = [
-            ("request_no", 3),
-            ("ip", max(2, max_ip_length)),
-            ("status", 6),
-            ("time", 5),
-            ("description", max(11, max_description_length)),
+            ("request_no", 3, "right"),
+            ("ip", max(2, max_ip_length), "left"),
+            ("status", 6, "right"),
+            ("time", 5, "right"),
+            ("description", max(11, max_description_length), "left"),
         ]
 
         row_length = self.print_table_row({
@@ -61,10 +61,16 @@ class Ping:
     def print_table_row(self, values):
         cells = []
 
-        for key, length in self.table_columns:
-            value = str(values[key])
+        for key, length, align in self.table_columns:
+            value = values[key]
+            string_value = str(value)
 
-            cells.append(value.ljust(length))
+            if align == "right":
+                string_value = string_value.rjust(length)
+            else:
+                string_value = string_value.ljust(length)
+
+            cells.append(string_value)
 
         string = "   ".join(cells)
 
