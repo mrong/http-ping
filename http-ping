@@ -56,7 +56,7 @@ class Ping:
         print("")
         print("-- Statistics ---")
         print("{} requests - {} successful ({}%), {} failed ({}%)".format(total_requests, self.successful_requests, successful_requests_percentage, self.failed_requests, failed_requests_percentage))
-        print("Average time: {}".format(round(average_time, 2)))
+        print("Average time: {} seconds".format(round(average_time, 2)))
 
     def print_table_row(self, values):
         cells = []
@@ -210,6 +210,13 @@ def main():
 
         if length > max_ip_length:
             max_ip_length = length
+
+    if max_iterations:
+        print("Pinging {} {} times".format(url, max_iterations))
+    else:
+        print("Pinging {}".format(url))
+
+    print("")
 
     ping = Ping(url=url, timeout=arguments.timeout, additional_curl_options=arguments.curl_options, max_ip_length=max_ip_length)
 
