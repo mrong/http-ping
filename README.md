@@ -31,11 +31,13 @@ At the end you'll see some statistics as it also provides the ping program.
 ### Options
 Parameter | Meaning | Default
 --------- | ------- | -------
--a | request the given URL from all IP addresses behind the domain | |
--i | check the URL the given times | no limit
--s | sleep the given time | 1, see ```man sleep```
--t | timeout for a single request | none
--h | show the help message
+--all-ips, -a | request the given URL from all IP addresses behind the domain |
+--ipv4, -4 | use IPv4 addresses only |
+--ipv6, -6 | use IPv6 addresses only |
+--iterations, -i | check the URL the given times | no limit
+--sleep, -s | sleep the given time | 1 second
+--timeout, -t | timeout for a single request | none
+--help, -h | show the help message |
 
 ### Screenshots / Examples
 ![screenshot1](assets/images/screenshot_ping.png)
