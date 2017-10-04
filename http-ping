@@ -43,7 +43,10 @@ import time
 from http.client import responses
 from urllib.parse import urlparse
 
-import argcomplete
+try:
+    import argcomplete
+except ImportError:
+    argcomplete = None
 
 from lib.ping import Ping
 from lib.table import Table
@@ -106,7 +109,8 @@ def main():
     argument_parser.add_argument("url", help="the URL to request")
     argument_parser.add_argument("curl_options", nargs=argparse.REMAINDER, help="additional options to pass to curl")
 
-    argcomplete.autocomplete(argument_parser)
+    if argcomplete:
+        argcomplete.autocomplete(argument_parser)
 
     if len(sys.argv) == 1:
         argument_parser.print_help()

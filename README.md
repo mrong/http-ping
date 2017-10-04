@@ -15,7 +15,7 @@ This is the result of a fun nightly live coding session at our LsW Telegram chan
 
 ### Requirements
 * Python 3
-* [argcomplete](https://argcomplete.readthedocs.io) - ```pip install argcomplete```
+* [argcomplete](https://argcomplete.readthedocs.io) (optional) - ```pip install argcomplete```
 
 ### Installation
 * download the repository to your local folder
