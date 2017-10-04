@@ -13,6 +13,10 @@ This is the result of a fun nightly live coding session at our LsW Telegram chan
 </p>
 
 
+### Requirements
+* Python 3
+* [argcomplete](https://argcomplete.readthedocs.io) - ```pip install argcomplete```
+
 ### Installation
 * download the repository to your local folder
 * ```cd``` into the http-ping folder
