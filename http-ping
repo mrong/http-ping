@@ -61,9 +61,9 @@ def show_stats(ping):
 def main():
     argument_parser = argparse.ArgumentParser(description="Request the given URL in a loop")
 
-    argument_parser.add_argument("--all-ips", "-a", action="store_true", help="request the given URL from all IP addresses (IPv4 and IPv6) behind the domain")
-    argument_parser.add_argument("--all-ipv4", "-4", action="store_true", help="request the given URL from all IPv4 addresses behind the domain")
-    argument_parser.add_argument("--all-ipv6", "-6", action="store_true", help="request the given URL from all IPv6 addresses behind the domain")
+    argument_parser.add_argument("--all-ips", "-a", action="store_true", help="request the given URL from all IP addresses behind the domain")
+    argument_parser.add_argument("--ipv4", "-4", action="store_true", help="use IPv4 addresses only")
+    argument_parser.add_argument("--ipv6", "-6", action="store_true", help="use IPv6 addresses only")
     argument_parser.add_argument("--iterations", "-i", help="check the URL the given times (default: no limit)")
     argument_parser.add_argument("--sleep", "-s", help="sleep the given time (default: 1 second)", default=1)
     argument_parser.add_argument("--timeout", "-t", help="timeout for a single request (default: none)")
@@ -83,19 +83,16 @@ def main():
     sleep = arguments.sleep
     url = arguments.url
 
-    use_all_ips = False
+    use_all_ips = arguments.all_ips
+
     lookup_ipv4 = False
     lookup_ipv6 = False
 
-    if arguments.all_ips or arguments.all_ipv4:
+    if arguments.ipv4:
         lookup_ipv4 = True
-        use_all_ips = True
-
-    if arguments.all_ips or arguments.all_ipv6:
+    elif arguments.ipv6:
         lookup_ipv6 = True
-        use_all_ips = True
-
-    if lookup_ipv4 is False and lookup_ipv6 is False:
+    else:
         lookup_ipv4 = True
         lookup_ipv6 = True
 
@@ -137,7 +134,7 @@ def main():
 
     print("".ljust(header_length, "-"))
 
-    ping = Ping(url=url, timeout=arguments.timeout, additional_curl_options=arguments.curl_options)
+    ping = Ping(url=url, timeout=arguments.timeout, additional_curl_options=arguments.curl_options, ipv4_only=arguments.ipv4, ipv6_only=arguments.ipv6)
 
     signal.signal(signal.SIGINT, lambda signal_no, frame: (show_stats(ping), exit(0)))
 

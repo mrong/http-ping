@@ -5,11 +5,13 @@ from urllib.parse import urlparse
 
 
 class Ping:
-    def __init__(self, url, timeout, additional_curl_options):
+    def __init__(self, url, timeout, additional_curl_options, ipv4_only, ipv6_only):
         self.url = url
         self.parsed_url = urlparse(url)
         self.timeout = timeout
         self.additional_curl_options = additional_curl_options
+        self.ipv4_only = ipv4_only
+        self.ipv6_only = ipv6_only
 
         self.successful_requests = 0
         self.failed_requests = 0
@@ -43,6 +45,12 @@ class Ping:
         if self.timeout:
             curl_options.append("--max-time")
             curl_options.append(self.timeout)
+
+        if self.ipv4_only:
+            curl_options.append("--ipv4")
+
+        if self.ipv6_only:
+            curl_options.append("--ipv6")
 
         if ip:
             host, port = self.parsed_url.netloc.split(":") + [None]
