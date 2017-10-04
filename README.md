@@ -9,7 +9,7 @@
 <b>A simple command line tool that returns the HTTP-Status-Code of a URL</b></p>
 
 <p align="center">
-This is the result of a fun nightly live coding session at our LsW Telegram channel. We hope that you have just as much fun and that you find it useful as we do. 
+This is the result of a fun nightly live coding session at our LsW Telegram channel. We hope that you have just as much fun and that you find it useful as we do.
 </p>
 
 
@@ -24,9 +24,9 @@ alias http-ping="/yourLocalPath/http-ping/http-ping"
 ```
 
 ### How to use
-Just type ```http-ping https://www.example.com```      
-Press ```ctrl+c``` to stop the process.       
-At the end you'll see some statistics as it also provides the ping program.      
+Just type ```http-ping https://www.example.com```
+Press ```ctrl+c``` to stop the process.
+At the end you'll see some statistics as it also provides the ping program.
 
 ### Options
 Parameter | Meaning | Default
@@ -44,8 +44,8 @@ Parameter | Meaning | Default
 ![screenshot1](assets/images/screenshot_help.png)
 
 ### Credits
-Many thanks to [fragbenny](https://fragbenny.de/) for the logo :) 
+Many thanks to [fragbenny](https://fragbenny.de/) for the logo :)
 
 ### License
-Copyright © 2017 [Michael Wieland](https://github.com/Programie) and [Michael Rong](https://github.com/mrong)      
-[GNU General Public License v3.0](LICENCE)      
+Copyright © 2017 [Michael Wieland](https://github.com/Programie) and [Michael Rong](https://github.com/mrong)
+[GNU General Public License v3.0](LICENCE)
