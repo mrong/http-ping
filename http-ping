@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argcomplete
 import argparse
 import signal
 import socket
@@ -7,8 +8,6 @@ import subprocess
 import time
 from http.client import responses
 from urllib.parse import urlparse
-
-import argcomplete
 
 
 class Ping:
