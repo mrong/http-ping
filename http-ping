@@ -5,6 +5,7 @@ import argparse
 import signal
 import socket
 import subprocess
+import sys
 import time
 from http.client import responses
 from urllib.parse import urlparse
@@ -186,6 +187,10 @@ def main():
     argument_parser.add_argument("curl_options", nargs=argparse.REMAINDER, help="Additional options to pass to curl")
 
     argcomplete.autocomplete(argument_parser)
+
+    if len(sys.argv) == 1:
+        argument_parser.print_help()
+        sys.exit(1)
 
     arguments = argument_parser.parse_args()
 
