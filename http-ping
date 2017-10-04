@@ -135,7 +135,12 @@ def main():
         lookup_ipv4 = True
         lookup_ipv6 = True
 
-    ips = dns_lookup(urlparse(url).netloc.split(":")[0], lookup_ipv4, lookup_ipv6)
+    host = urlparse(url).netloc.split(":")[0]
+    ips = dns_lookup(host, lookup_ipv4, lookup_ipv6)
+
+    if not ips:
+        print("Could not resolve host: {}".format(host))
+        exit(1)
 
     iteration = 0
     max_ip_length = 0
@@ -181,10 +186,6 @@ def main():
         iteration += 1
 
         if use_all_ips:
-            if not ips:
-                print("No IPs found")
-                exit(1)
-
             for ip in ips:
                 table.print_row(ping.do_request(ip))
         else:
