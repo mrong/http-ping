@@ -105,6 +105,7 @@ def main():
     argument_parser.add_argument("--iterations", "-i", help="check the URL the given times (default: no limit)")
     argument_parser.add_argument("--sleep", "-s", help="sleep the given time (default: 1 second)", default=1)
     argument_parser.add_argument("--timeout", "-t", help="timeout for a single request (default: none)")
+    argument_parser.add_argument('--version', action="version", version="%(prog)s 0.2.0")
 
     argument_parser.add_argument("url", help="the URL to request")
     argument_parser.add_argument("curl_options", nargs=argparse.REMAINDER, help="additional options to pass to curl")
