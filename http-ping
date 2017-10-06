@@ -125,16 +125,13 @@ def main():
 
     use_all_ips = arguments.all_ips
 
-    lookup_ipv4 = False
-    lookup_ipv6 = False
+    lookup_ipv4 = True
+    lookup_ipv6 = True
 
     if arguments.ipv4:
-        lookup_ipv4 = True
+        lookup_ipv6 = False
     elif arguments.ipv6:
-        lookup_ipv6 = True
-    else:
-        lookup_ipv4 = True
-        lookup_ipv6 = True
+        lookup_ipv4 = False
 
     host = urlparse(url).netloc.split(":")[0]
     ips = dns_lookup(host, lookup_ipv4, lookup_ipv6)
