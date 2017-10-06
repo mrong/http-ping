@@ -1,9 +1,9 @@
+import os
 import subprocess
+import sys
 import time
 from http.client import responses
 from urllib.parse import urlparse
-
-import sys
 
 
 class Ping:
@@ -20,6 +20,13 @@ class Ping:
         self.failed_requests = 0
         self.total_time = 0
         self.request_no = 0
+
+        self.curl_env = {}
+        for key, value in os.environ.items():
+            if key.startswith("LC_") or key.startswith("LANG"):
+                continue
+
+            self.curl_env[key] = value
 
     def calculate_stats(self):
         total_requests = self.successful_requests + self.failed_requests
@@ -78,7 +85,7 @@ class Ping:
 
         start_time = time.time()
 
-        process = subprocess.run(curl_command, stdout=subprocess.PIPE)
+        process = subprocess.run(curl_command, stdout=subprocess.PIPE, env=self.curl_env)
 
         curl_output = process.stdout.decode("utf-8").split()
 
