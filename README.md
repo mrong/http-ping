@@ -18,14 +18,16 @@ This is the result of a fun nightly live coding session at our LsW Telegram chan
 * [argcomplete](https://argcomplete.readthedocs.io) (optional) - ```pip install argcomplete```
 
 ### Installation
-* download the repository to your local folder
-* ```cd``` into the http-ping folder
-* have fun :)
+* Download the [latest release](https://github.com/mrong/http-ping/releases/latest)
+* Make the binary executable: ```chmod +x http-ping```
+* Have fun :)
 
 To make the usage more comfortable, you can create an alias in your ```.bashrc```:
 ```
-alias http-ping="/yourLocalPath/http-ping/http-ping"
+alias http-ping="/yourLocalPath/http-ping"
 ```
+
+Or even install it systemwide in one of the bin folders (e.g. ```/usr/local/bin/http-ping```)
 
 ### How to use
 Just type ```http-ping https://www.example.com```
@@ -41,6 +43,8 @@ Parameter        | Meaning                                                      
 --iterations, -i | check the URL the given times                                 | no limit
 --sleep, -s      | sleep the given time                                          | 1 second
 --timeout, -t    | timeout for a single request                                  | none
+--verbose, -v    | be more verbose                                               |
+--version        | show the currently used version                               |
 --help, -h       | show the help message                                         |
 
 ### Screenshots / Examples
