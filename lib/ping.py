@@ -3,15 +3,18 @@ import time
 from http.client import responses
 from urllib.parse import urlparse
 
+import sys
+
 
 class Ping:
-    def __init__(self, url, timeout, additional_curl_options, ipv4_only, ipv6_only):
+    def __init__(self, url, timeout, additional_curl_options, ipv4_only, ipv6_only, verbose):
         self.url = url
         self.parsed_url = urlparse(url)
         self.timeout = timeout
         self.additional_curl_options = additional_curl_options
         self.ipv4_only = ipv4_only
         self.ipv6_only = ipv6_only
+        self.verbose = verbose
 
         self.successful_requests = 0
         self.failed_requests = 0
@@ -71,6 +74,8 @@ class Ping:
 
         curl_command = ["curl"] + curl_options + [self.url]
 
+        self.print_verbose("Curl command: {}".format(" ".join(curl_command)))
+
         start_time = time.time()
 
         process = subprocess.run(curl_command, stdout=subprocess.PIPE)
@@ -107,3 +112,9 @@ class Ping:
             "time": round(request_time, 2),
             "description": description,
         }
+
+    def print_verbose(self, *args):
+        if not self.verbose:
+            return
+
+        print(*args, file=sys.stderr)
