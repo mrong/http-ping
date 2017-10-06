@@ -1,3 +1,5 @@
+rebuild: clean build
+
 build:
 	mkdir build
 	cp http-ping build/__main__.py
