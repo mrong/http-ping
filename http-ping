@@ -170,7 +170,16 @@ def main():
     elif arguments.ipv6:
         lookup_ipv4 = False
 
-    host = urlparse(url).netloc.split(":")[0]
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme and not parsed_url.netloc:
+        url = "http://" + url
+        parsed_url = urlparse(url)
+
+    if not parsed_url.scheme or not parsed_url.netloc:
+        print("Malformed URL: {}".format(url))
+        exit(1)
+
+    host = parsed_url.netloc.split(":")[0]
     ips = dns_lookup(host, lookup_ipv4, lookup_ipv6)
 
     if not ips:
