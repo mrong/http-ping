@@ -14,3 +14,8 @@ install:
 script:
   # There are no real unit or integration tests yet, so just execute the application
   - python http-ping -i 3 -t 10 https://example.com
+
+  # Also test with different locales (the right number format returned by curl is important)
+  - LANG=C python http-ping -i 3 -t 10 https://example.com
+  - LANG=en_US.UTF-8 python http-ping -i 3 -t 10 https://example.com
+  - LANG=de_DE.UTF-8 python http-ping -i 3 -t 10 https://example.com
