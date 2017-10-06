@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -12,7 +12,7 @@
 # *                                                                         * *
 # * Creation Date:      09/10/2017                                          * *
 # *                                                                         * *
-# * Version:            0.1.0                                               * *
+# * Version:            0.2.0                                               * *
 # *                                                                         * *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # *                                                                         * *
@@ -35,110 +35,169 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-script_path=$(dirname $(realpath $0))
-source "${script_path}/http-code-to-text.sh"
+import argparse
+import signal
+import socket
+import sys
+import time
+from http.client import responses
+from urllib.parse import urlparse
 
-function show_stats()
-{
-    local total_requests=$((successful_requests + failed_requests))
-    local average_time=$(awk "BEGIN {print ${total_time} / ${total_requests}}")
-    local successful_requests_percentage=$(awk "BEGIN {print ${successful_requests} / ${total_requests} * 100}")
-    local failed_requests_percentage=$(awk "BEGIN {print ${failed_requests} / ${total_requests} * 100}")
+try:
+    import argcomplete
+except ImportError:
+    argcomplete = None
 
-    echo ""
-    echo "--- Statistics ---"
-    echo "${total_requests} requests - ${successful_requests} successful (${successful_requests_percentage}%), ${failed_requests} failed (${failed_requests_percentage}%)"
-    echo "Average time: ${average_time}"
-    exit
-}
+from lib.ping import Ping
+from lib.table import Table
 
-trap show_stats SIGINT
 
-loop_iterations=0
-sleep_time=1
+def get_max_description_length():
+    max_length = 0
 
-iteration=0
-total_time=0
-successful_requests=0
-failed_requests=0
+    for http_status in enumerate(responses):
+        length = len(responses[http_status[1]])
 
-while getopts "hi:s:t:" arg; do
-    case ${arg} in
-        h)
-            show_usage=true
-        ;;
-        i)
-            loop_iterations=${OPTARG}
-        ;;
-        s)
-            sleep_time=${OPTARG}
-        ;;
-        t)
-            timeout=${OPTARG}
-        ;;
-    esac
-done
+        if length > max_length:
+            max_length = length
 
-shift $((${OPTIND} - 1))
+    return max_length
 
-url="$1"
 
-if [ -z "${url}" ] || [ ${show_usage} ]; then
-    echo "Usage: $0 [-h] [-i iterations] [-s sleep] [-t timeout] <url>"
-    echo ""
-    echo "Options:"
-    echo "  -i  Check the URL the given times (default: no limit)"
-    echo "  -s  Sleep the given time (default: 1, see 'man sleep')"
-    echo "  -t  Timeout for a single request (default: none)"
-    echo "  -h  Show this help message"
-    exit
-fi
+def dns_lookup(host, v4, v6):
+    all_address_info = []
 
-url_regex="(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]"
+    if v4:
+        try:
+            all_address_info += socket.getaddrinfo(host, None, socket.AF_INET)
+        except socket.gaierror:
+            pass
 
-if [[ $1 =~ ${url_regex} ]]; then
-    url=$1
+    if v6:
+        try:
+            all_address_info += socket.getaddrinfo(host, None, socket.AF_INET6)
+        except socket.gaierror:
+            pass
 
-    curl_options=("-w \"%{http_code} %{time_total}\n\" -o /dev/null -s")
+    all_ip_addresses = set()
 
-    if [ ${timeout} ]; then
-        curl_options+=("--max-time ${timeout}")
-    fi
+    for entry in all_address_info:
+        all_ip_addresses.add(entry[4][0])
 
-    curl_command="curl ${curl_options[*]} ${url}"
+    return all_ip_addresses
 
-    echo -e "\n#\tStatus\tTime\t\tDescription"
-    echo "-------------------------------------------------------------------------------"
 
-    while [ true ]; do
-        iteration=$((iteration + 1))
+def show_stats(ping):
+    stats = ping.calculate_stats()
 
-        status=$(eval ${curl_command})
+    print("")
+    print("-- Statistics ---")
+    print("{} requests - {} successful ({}%), {} failed ({}%)".format(stats["total_requests"], stats["successful_requests"], stats["successful_requests_percentage"], stats["failed_requests"], stats["failed_requests_percentage"]))
+    print("Average time: {} seconds".format(round(stats["average_time"], 2)))
 
-        set - ${status}
 
-        code=$1
-        time=$2
-        description=$(http_code_to_text ${code})
+def main():
+    argument_parser = argparse.ArgumentParser(description="Request the given URL in a loop")
 
-        echo -e "${iteration}\t${code}\t${time}\t${description}"
+    argument_parser.add_argument("--all-ips", "-a", action="store_true", help="request the given URL from all IP addresses behind the domain")
+    argument_parser.add_argument("--ipv4", "-4", action="store_true", help="use IPv4 addresses only")
+    argument_parser.add_argument("--ipv6", "-6", action="store_true", help="use IPv6 addresses only")
+    argument_parser.add_argument("--iterations", "-i", help="check the URL the given times (default: no limit)")
+    argument_parser.add_argument("--sleep", "-s", help="sleep the given time (default: 1 second)", default=1)
+    argument_parser.add_argument("--timeout", "-t", help="timeout for a single request (default: none)")
+    argument_parser.add_argument('--version', action="version", version="%(prog)s 0.2.0")
 
-        total_time=$(awk "BEGIN {print ${total_time} + ${time}}")
+    argument_parser.add_argument("url", help="the URL to request")
+    argument_parser.add_argument("curl_options", nargs=argparse.REMAINDER, help="additional options to pass to curl")
 
-        if [ $code -gt 99 ] && [ $code -lt 400 ]; then
-            successful_requests=$((successful_requests + 1))
-        else
-            failed_requests=$((failed_requests + 1))
-        fi
+    if argcomplete:
+        argcomplete.autocomplete(argument_parser)
 
-        if [ $loop_iterations -gt 0 ] && [ $iteration -eq $loop_iterations ]; then
+    if len(sys.argv) == 1:
+        argument_parser.print_help()
+        sys.exit(1)
+
+    arguments = argument_parser.parse_args()
+
+    max_iterations = arguments.iterations
+    sleep = arguments.sleep
+    url = arguments.url
+
+    use_all_ips = arguments.all_ips
+
+    lookup_ipv4 = False
+    lookup_ipv6 = False
+
+    if arguments.ipv4:
+        lookup_ipv4 = True
+    elif arguments.ipv6:
+        lookup_ipv6 = True
+    else:
+        lookup_ipv4 = True
+        lookup_ipv6 = True
+
+    host = urlparse(url).netloc.split(":")[0]
+    ips = dns_lookup(host, lookup_ipv4, lookup_ipv6)
+
+    if not ips:
+        print("Could not resolve host: {}".format(host))
+        exit(1)
+
+    iteration = 0
+    max_ip_length = 0
+
+    for ip in ips:
+        length = len(ip)
+
+        if length > max_ip_length:
+            max_ip_length = length
+
+    if max_iterations:
+        print("Pinging {} {} times".format(url, max_iterations))
+    else:
+        print("Pinging {}".format(url))
+
+    print("")
+
+    table_columns = [
+        ("request_no", 3, "right"),
+        ("ip", max(2, max_ip_length), "left"),
+        ("status", 6, "right"),
+        ("time", 5, "right"),
+        ("description", max(11, get_max_description_length()), "left"),
+    ]
+
+    table = Table(columns=table_columns, column_separator="   ")
+
+    header_length = table.print_row({
+        "request_no": "#",
+        "ip": "IP",
+        "status": "Status",
+        "time": "Time",
+        "description": "Description",
+    })
+
+    print("".ljust(header_length, "-"))
+
+    ping = Ping(url=url, timeout=arguments.timeout, additional_curl_options=arguments.curl_options, ipv4_only=arguments.ipv4, ipv6_only=arguments.ipv6)
+
+    signal.signal(signal.SIGINT, lambda signal_no, frame: (show_stats(ping), exit(0)))
+
+    while True:
+        iteration += 1
+
+        if use_all_ips:
+            for ip in ips:
+                table.print_row(ping.do_request(ip))
+        else:
+            table.print_row(ping.do_request(None))
+
+        if max_iterations and iteration >= int(max_iterations):
+            show_stats(ping)
             break
-        fi
 
-        sleep ${sleep_time}
-    done
+        time.sleep(float(sleep))
 
-    show_stats
-else
-    echo "URL '${url}' is not a valid link"
-fi
+
+if __name__ == "__main__":
+    main()
