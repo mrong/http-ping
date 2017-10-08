@@ -24,6 +24,7 @@ class Ping:
         self.curl_env = {}
         for key, value in os.environ.items():
             if key.startswith("LC_") or key.startswith("LANG"):
+                self.print_verbose("Ignoring environment variable: {}".format(key))
                 continue
 
             self.curl_env[key] = value
