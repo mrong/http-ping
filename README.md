@@ -6,7 +6,7 @@
 </h1>
 
 <p align="center">
-<b>A simple command line tool that returns the HTTP-Status-Code of a URL</b></p>
+<b>A simple command line tool thats pings a URL in a fixed interval</b></p>
 
 <p align="center">
 This is the result of a fun nightly live coding session at our LsW Telegram channel. We hope that you have just as much fun and that you find it useful as we do.
