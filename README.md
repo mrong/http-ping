@@ -14,7 +14,8 @@ This is the result of a fun nightly live coding session at our LsW Telegram chan
 
 
 ### Requirements
-* Python 3
+* Python 3.5+
+* [curl](https://curl.haxx.se) (version >= 7.29.0)
 * [argcomplete](https://argcomplete.readthedocs.io) (optional) - ```pip install argcomplete```
 
 ### Installation
