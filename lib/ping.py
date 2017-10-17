@@ -103,7 +103,7 @@ class Ping:
         else:
             http_code = 0
             request_time = time.time() - start_time
-            used_ip = ""
+            used_ip = ip
             description = "Curl failed ({})".format(process.returncode)
 
         self.total_time += request_time
