@@ -113,6 +113,9 @@ class Ping:
         else:
             self.failed_requests += 1
 
+        if used_ip is None:
+            used_ip = "N/A"
+
         return {
             "request_no": self.request_no,
             "ip": used_ip,
