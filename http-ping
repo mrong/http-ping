@@ -179,11 +179,10 @@ def main():
         print("Malformed URL: {}".format(url))
         exit(1)
 
-    host = parsed_url.netloc.split(":")[0]
-    ips = dns_lookup(host, lookup_ipv4, lookup_ipv6)
+    ips = dns_lookup(parsed_url.hostname, lookup_ipv4, lookup_ipv6)
 
     if not ips:
-        print("Could not resolve host: {}".format(host))
+        print("Could not resolve host: {}".format(parsed_url.hostname))
         exit(1)
 
     if use_all_ips:

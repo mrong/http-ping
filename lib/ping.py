@@ -64,7 +64,8 @@ class Ping:
             curl_options.append("--ipv6")
 
         if ip:
-            host, port = self.parsed_url.netloc.split(":") + [None]
+            host = self.parsed_url.hostname
+            port = self.parsed_url.port
 
             if port is None:
                 scheme = self.parsed_url.scheme
