@@ -6,7 +6,7 @@
 </h1>
 
 <p align="center">
-<b>A simple command line tool that returns the HTTP-Status-Code of a URL</b></p>
+<b>A simple command line tool thats pings a URL in a fixed interval</b></p>
 
 <p align="center">
 This is the result of a fun nightly live coding session at our LsW Telegram channel. We hope that you have just as much fun and that you find it useful as we do.
@@ -14,18 +14,21 @@ This is the result of a fun nightly live coding session at our LsW Telegram chan
 
 
 ### Requirements
-* Python 3
+* Python 3.5+
+* [curl](https://curl.haxx.se) (version >= 7.29.0)
 * [argcomplete](https://argcomplete.readthedocs.io) (optional) - ```pip install argcomplete```
 
 ### Installation
-* download the repository to your local folder
-* ```cd``` into the http-ping folder
-* have fun :)
+* Download the [latest release](https://github.com/mrong/http-ping/releases/latest)
+* Make the binary executable: ```chmod +x http-ping```
+* Have fun :)
 
 To make the usage more comfortable, you can create an alias in your ```.bashrc```:
 ```
-alias http-ping="/yourLocalPath/http-ping/http-ping"
+alias http-ping="/yourLocalPath/http-ping"
 ```
+
+Or even install it systemwide in one of the bin folders (e.g. ```/usr/local/bin/http-ping```)
 
 ### How to use
 Just type ```http-ping https://www.example.com```
@@ -41,6 +44,8 @@ Parameter        | Meaning                                                      
 --iterations, -i | check the URL the given times                                 | no limit
 --sleep, -s      | sleep the given time                                          | 1 second
 --timeout, -t    | timeout for a single request                                  | none
+--verbose, -v    | be more verbose                                               |
+--version        | show the currently used version                               |
 --help, -h       | show the help message                                         |
 
 ### Screenshots / Examples

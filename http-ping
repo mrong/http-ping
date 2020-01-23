@@ -12,7 +12,7 @@
 # *                                                                         * *
 # * Creation Date:      09/10/2017                                          * *
 # *                                                                         * *
-# * Version:            0.2.0                                               * *
+# * Version:            0.3.0                                               * *
 # *                                                                         * *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # *                                                                         * *
@@ -51,6 +51,8 @@ except ImportError:
 from lib.ping import Ping
 from lib.table import Table
 
+verbose = False
+
 
 def get_max_description_length():
     max_length = 0
@@ -65,24 +67,41 @@ def get_max_description_length():
 
 
 def dns_lookup(host, v4, v6):
-    all_address_info = []
+    all_ip_addresses = set()
 
     if v4:
+        print_verbose("Looking up IPv4 addresses")
+
         try:
-            all_address_info += socket.getaddrinfo(host, None, socket.AF_INET)
-        except socket.gaierror:
+            ip_addresses = set()
+            addresses_info = socket.getaddrinfo(host, None, socket.AF_INET)
+
+            for entry in addresses_info:
+                ip_addresses.add(entry[4][0])
+
+            print_verbose("IPv4 addresses: {}".format(", ".join(ip_addresses)))
+
+            all_ip_addresses.update(ip_addresses)
+        except socket.gaierror as exception:
+            print_verbose("Can't lookup IPv4 addresses: {}".format(exception))
             pass
 
     if v6:
+        print_verbose("Looking up IPv6 addresses")
+
         try:
-            all_address_info += socket.getaddrinfo(host, None, socket.AF_INET6)
-        except socket.gaierror:
+            ip_addresses = set()
+            addresses_info = socket.getaddrinfo(host, None, socket.AF_INET6)
+
+            for entry in addresses_info:
+                ip_addresses.add(entry[4][0])
+
+            print_verbose("IPv6 addresses: {}".format(", ".join(ip_addresses)))
+
+            all_ip_addresses.update(ip_addresses)
+        except socket.gaierror as exception:
+            print_verbose("Can't lookup IPv6 addresses: {}".format(exception))
             pass
-
-    all_ip_addresses = set()
-
-    for entry in all_address_info:
-        all_ip_addresses.add(entry[4][0])
 
     return all_ip_addresses
 
@@ -96,6 +115,15 @@ def show_stats(ping):
     print("Average time: {} seconds".format(round(stats["average_time"], 2)))
 
 
+def print_verbose(*args):
+    global verbose
+
+    if not verbose:
+        return
+
+    print(*args, file=sys.stderr)
+
+
 def main():
     argument_parser = argparse.ArgumentParser(description="Request the given URL in a loop")
 
@@ -105,7 +133,8 @@ def main():
     argument_parser.add_argument("--iterations", "-i", help="check the URL the given times (default: no limit)")
     argument_parser.add_argument("--sleep", "-s", help="sleep the given time (default: 1 second)", default=1)
     argument_parser.add_argument("--timeout", "-t", help="timeout for a single request (default: none)")
-    argument_parser.add_argument('--version', action="version", version="%(prog)s 0.2.0")
+    argument_parser.add_argument("--verbose", "-v", action="store_true", help="be more verbose")
+    argument_parser.add_argument('--version', action="version", version="%(prog)s 0.3.0")
 
     argument_parser.add_argument("url", help="the URL to request")
     argument_parser.add_argument("curl_options", nargs=argparse.REMAINDER, help="additional options to pass to curl")
@@ -119,29 +148,53 @@ def main():
 
     arguments = argument_parser.parse_args()
 
+    global verbose
+    verbose = arguments.verbose
+
+    if not argcomplete:
+        print_verbose("Python module 'argcomplete' not available - install with 'pip install argcomplete' to get shell completion")
+
     max_iterations = arguments.iterations
     sleep = arguments.sleep
+    timeout = arguments.timeout
     url = arguments.url
+    curl_options = arguments.curl_options
 
     use_all_ips = arguments.all_ips
 
-    lookup_ipv4 = False
-    lookup_ipv6 = False
+    lookup_ipv4 = True
+    lookup_ipv6 = True
 
     if arguments.ipv4:
-        lookup_ipv4 = True
+        lookup_ipv6 = False
     elif arguments.ipv6:
-        lookup_ipv6 = True
-    else:
-        lookup_ipv4 = True
-        lookup_ipv6 = True
+        lookup_ipv4 = False
 
-    host = urlparse(url).netloc.split(":")[0]
-    ips = dns_lookup(host, lookup_ipv4, lookup_ipv6)
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme and not parsed_url.netloc:
+        url = "http://" + url
+        parsed_url = urlparse(url)
+
+    if not parsed_url.scheme or not parsed_url.netloc:
+        print("Malformed URL: {}".format(url))
+        exit(1)
+
+    ips = dns_lookup(parsed_url.hostname, lookup_ipv4, lookup_ipv6)
 
     if not ips:
-        print("Could not resolve host: {}".format(host))
+        print("Could not resolve host: {}".format(parsed_url.hostname))
         exit(1)
+
+    if use_all_ips:
+        print_verbose("Requesting URL from all IP addresses ({})".format(len(ips)))
+
+    print_verbose("Sleep: {} seconds".format(sleep))
+
+    if timeout:
+        print_verbose("Timeout: {} seconds".format(timeout))
+
+    if curl_options:
+        print_verbose("Additional curl options: {}".format(" ".join(curl_options)))
 
     iteration = 0
     max_ip_length = 0
@@ -179,7 +232,7 @@ def main():
 
     print("".ljust(header_length, "-"))
 
-    ping = Ping(url=url, timeout=arguments.timeout, additional_curl_options=arguments.curl_options, ipv4_only=arguments.ipv4, ipv6_only=arguments.ipv6)
+    ping = Ping(url=url, timeout=timeout, additional_curl_options=curl_options, ipv4_only=arguments.ipv4, ipv6_only=arguments.ipv6, verbose=verbose)
 
     signal.signal(signal.SIGINT, lambda signal_no, frame: (show_stats(ping), exit(0)))
 
